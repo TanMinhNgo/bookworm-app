@@ -3,8 +3,11 @@ import User from '../models/User.js';
 
 const protectRoute = async (req, res, next) => {
     try {
-        const token = req.headers("Authorization").replace("Bearer ", "");
-    
+        let token = req.headers["Authorization"];
+        if (token) {
+            token = token.replace("Bearer ", "");
+        }
+
         if (!token) {
             return res.status(401).json({ message: 'Unauthorized' });
         }
