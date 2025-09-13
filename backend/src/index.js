@@ -16,7 +16,7 @@ app.use(cors());
 app.use("/api/auth", authRoutes);
 app.use('/api/books', bookRoutes);
 
-    connectDB();
+connectDB();
 
 app.get('/', (req, res) => {
     res.send("Connected to Db successfully" + connectDB().connection.host);
