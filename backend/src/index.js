@@ -5,7 +5,6 @@ import 'dotenv/config';
 
 import authRoutes from './routes/authRoutes.js';
 import bookRoutes from './routes/bookRoutes.js';
-import { connect } from 'mongoose';
 
 const app = express();
 const PORT = process.env.PORT;
