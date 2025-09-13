@@ -34,7 +34,7 @@ const Login = () => {
     if (!result.success) Alert.alert("Error", result.error);
   };
 
-  if (!isCheckingAuth) {
+  if (isCheckingAuth) {
     return null;
   }
 
