@@ -1,1 +1,1 @@
-export const API_URL = "https://bookworm-app-eight.vercel.app/api";
+export const API_URL = "https://bookworm-app-backend-sage.vercel.app/api";
