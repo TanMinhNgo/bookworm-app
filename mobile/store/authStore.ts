@@ -1,4 +1,3 @@
-
 import { create } from "zustand";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import { API_URL } from "../constants/api";
@@ -74,14 +73,15 @@ export const useAuthStore = create((set) => ({
   checkAuth: async () => {
     try {
       const token = await AsyncStorage.getItem("token");
-      const userJson = await AsyncStorage.getItem("user");
-      const user = userJson ? JSON.parse(userJson) : null;
-
-      set({ token, user });
-    } catch (error) {
-      console.log("Auth check failed", error);
-    } finally {
-      set({ isCheckingAuth: false });
+      const user = await AsyncStorage.getItem("user");
+      if (token && user) {
+        set({ token, user: JSON.parse(user), isCheckingAuth: false });
+      } else {
+        set({ token: null, user: null, isCheckingAuth: false });
+      }
+    } catch (error: any) {
+      console.log("Error checking auth", error);
+      set({ token: null, user: null, isCheckingAuth: false });
     }
   },
 

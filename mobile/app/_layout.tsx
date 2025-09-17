@@ -10,10 +10,10 @@ import { useEffect } from "react";
 SplashScreen.preventAutoHideAsync();
 
 type AuthStore = {
-  checkAuth: () => void;
-  user: object | null;
-  token: string | null;
-};
+    user: object | null;
+    token: string | null;
+    checkAuth: () => void;
+}
 
 export default function RootLayout() {
   const router = useRouter();
@@ -32,7 +32,8 @@ export default function RootLayout() {
   useEffect(() => {
     checkAuth();
   }, []);
-  
+
+  // handle navigation based on the auth state
   useEffect(() => {
     const inAuthScreen = segments[0] === "(auth)";
     const isSignedIn = user && token;

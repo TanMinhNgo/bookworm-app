@@ -24,8 +24,17 @@ type AuthStore = {
     token: string | null;
 }
 
+type Book = {
+  _id: string;
+  title: string;
+  image: string;
+  rating: number;
+  caption: string;
+  createdAt: string;
+};
+
 export default function Profile() {
-  const [books, setBooks] = useState([]);
+  const [books, setBooks] = useState<Book[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const [refreshing, setRefreshing] = useState(false);
   const [deleteBookId, setDeleteBookId] = useState("");
@@ -39,6 +48,7 @@ export default function Profile() {
       setIsLoading(true);
 
       const response = await fetch(`${API_URL}/books/user`, {
+        method: "GET",
         headers: { Authorization: `Bearer ${token}` },
       });
 
