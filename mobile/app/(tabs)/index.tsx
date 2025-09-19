@@ -32,6 +32,20 @@ export default function Home() {
   const [page, setPage] = useState(1);
   const [hasMore, setHasMore] = useState(true);
 
+  const { checkAuth } = useAuthStore() as { checkAuth: () => Promise<void> };
+
+  useEffect(() => {
+    check();
+  }, []);
+
+  const check = async () => {
+    try {
+      await checkAuth();
+    } catch (error) {
+      console.log("Error checking auth", error);
+    }
+  };
+
   const fetchBooks = async (pageNum = 1, refresh = false) => {
     try {
       if (refresh) setRefreshing(true);

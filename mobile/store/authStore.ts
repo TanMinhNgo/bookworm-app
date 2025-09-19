@@ -60,7 +60,17 @@ export const useAuthStore = create((set) => ({
       if (!response.ok) throw new Error(data.message || "Something went wrong");
 
       await AsyncStorage.setItem("user", JSON.stringify(data.user));
-      await AsyncStorage.setItem("token", data.token);
+      const tokenGet = await fetch(`${API_URL}/tokens`, {
+        method: "GET",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+          user: data.user._id
+        })
+      });
+      const tokenData = await tokenGet.json();
+      if (!tokenGet.ok) throw new Error(tokenData.message || "Something went wrong");
 
       set({ token: data.token, user: data.user, isLoading: false });
 
@@ -73,10 +83,14 @@ export const useAuthStore = create((set) => ({
 
   checkAuth: async () => {
     try {
-      const tokenGet = await AsyncStorage.getItem("token");
+      const tokenGet = await fetch(`${API_URL}/tokens`, {
+        method: "GET",
+      });
+      const data = await tokenGet.json();
+      if (!tokenGet.ok) throw new Error(data.message || "Something went wrong");
       const userGet = await AsyncStorage.getItem("user");
-      if (tokenGet && userGet) {
-        set({ token: tokenGet, user: JSON.parse(userGet), isCheckingAuth: false });
+      if (data && userGet) {
+        set({ token: data, user: JSON.parse(userGet), isCheckingAuth: false });
       } else {
         set({ token: null, user: null, isCheckingAuth: false });
       }
