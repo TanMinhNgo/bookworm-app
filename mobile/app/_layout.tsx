@@ -30,8 +30,18 @@ export default function RootLayout() {
   }, [fontsLoaded]);
 
   useEffect(() => {
-    checkAuth();
+    check();
   }, []);
+
+  const check = async () => {
+    try {
+      await checkAuth();
+    } catch (error) {
+      console.log("Error checking auth", error);
+    } finally {
+      await SplashScreen.hideAsync();
+    }
+  }
 
   // handle navigation based on the auth state
   useEffect(() => {

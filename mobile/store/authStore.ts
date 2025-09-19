@@ -31,6 +31,7 @@ export const useAuthStore = create((set) => ({
       await AsyncStorage.setItem("token", data.token);
 
       set({ token: data.token, user: data.user, isLoading: false });
+      console.log(await AsyncStorage.getItem("token"));
 
       return { success: true };
     } catch (error: any) {
@@ -72,10 +73,10 @@ export const useAuthStore = create((set) => ({
 
   checkAuth: async () => {
     try {
-      const token = await AsyncStorage.getItem("token");
-      const user = await AsyncStorage.getItem("user");
-      if (token && user) {
-        set({ token, user: JSON.parse(user), isCheckingAuth: false });
+      const tokenGet = await AsyncStorage.getItem("token");
+      const userGet = await AsyncStorage.getItem("user");
+      if (tokenGet && userGet) {
+        set({ token: tokenGet, user: JSON.parse(userGet), isCheckingAuth: false });
       } else {
         set({ token: null, user: null, isCheckingAuth: false });
       }
