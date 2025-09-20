@@ -31,7 +31,6 @@ export const useAuthStore = create((set) => ({
       await AsyncStorage.setItem("token", data.token);
 
       set({ token: data.token, user: data.user, isLoading: false });
-      console.log(await AsyncStorage.getItem("token"));
 
       return { success: true };
     } catch (error: any) {

@@ -35,15 +35,14 @@ export default function RootLayout() {
 
   const check = async () => {
     try {
-      await checkAuth();
+      checkAuth();
     } catch (error) {
       console.log("Error checking auth", error);
     } finally {
       await SplashScreen.hideAsync();
     }
-  }
+  };
 
-  // handle navigation based on the auth state
   useEffect(() => {
     const inAuthScreen = segments[0] === "(auth)";
     const isSignedIn = user && token;

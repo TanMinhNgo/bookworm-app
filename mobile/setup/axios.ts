@@ -16,8 +16,6 @@ const instance = axios.create({
 
 instance.defaults.withCredentials = true;
 
-instance.defaults.headers.common['Authorization'] = `Bearer ${await AsyncStorage.getItem("token")}`;
-
 // Request interceptor
 instance.interceptors.request.use(
   (config) => {

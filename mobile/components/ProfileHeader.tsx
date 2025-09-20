@@ -15,7 +15,6 @@ type AuthStore = {
 
 export default function ProfileHeader() {
   const { user } = useAuthStore() as AuthStore;
-
   if (!user) return null;
 
   return (

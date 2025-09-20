@@ -69,7 +69,7 @@ const styles = StyleSheet.create({
   },
   bookImageContainer: {
     width: "100%",
-    height: 200,
+    height: 320,
     borderRadius: 12,
     overflow: "hidden",
     marginBottom: 12,
@@ -78,6 +78,7 @@ const styles = StyleSheet.create({
   bookImage: {
     width: "100%",
     height: "100%",
+  resizeMode: "cover",
   },
   bookDetails: {
     padding: 4,

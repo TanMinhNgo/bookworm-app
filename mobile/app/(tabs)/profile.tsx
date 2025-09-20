@@ -21,8 +21,8 @@ import { sleep } from ".";
 import Loader from "../../components/Loader";
 
 type AuthStore = {
-    user: any;
-}
+  token: string | null;
+};
 
 type Book = {
   _id: string;
@@ -37,15 +37,9 @@ export default function Profile() {
   const [books, setBooks] = useState<Book[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const [refreshing, setRefreshing] = useState(false);
-  const [deleteBookId, setDeleteBookId] = useState("");
-  const [token, setToken] = useState<string | null>(null);
+  const [deleteBookId, setDeleteBookId] = useState<string | null>(null);
 
-  const { user } = useAuthStore() as AuthStore;
-
-  useEffect(() => {
-    fetchToken();
-    fetchData();
-  }, []);
+  const { token } = useAuthStore() as AuthStore;
 
   const router = useRouter();
 
@@ -54,35 +48,28 @@ export default function Profile() {
       setIsLoading(true);
 
       const response = await fetch(`${API_URL}/books/user`, {
-        method: "GET",
         headers: { Authorization: `Bearer ${token}` },
       });
 
       const data = await response.json();
-      if (!response.ok) throw new Error(data.message || "Failed to fetch user books");
+      if (!response.ok)
+        throw new Error(data.message || "Failed to fetch user books");
 
       setBooks(data);
     } catch (error) {
       console.error("Error fetching data:", error);
-      Alert.alert("Error", "Failed to load profile data. Pull down to refresh.");
+      Alert.alert(
+        "Error",
+        "Failed to load profile data. Pull down to refresh."
+      );
     } finally {
       setIsLoading(false);
     }
   };
 
-  const fetchToken = async () => {
-    try {
-      const response = await fetch(`${API_URL}/tokens`, {
-        method: "GET"
-      });
-      const data = await response.json();
-      if (!response.ok) throw new Error(data.message || "Something went wrong");
-      setToken(data.token);
-      console.log("Fetched token:", data);
-    } catch (error) {
-      console.error("Error fetching token:", error);
-    }
-  };
+  useEffect(() => {
+    fetchData();
+  }, []);
 
   const handleDeleteBook = async (bookId: string) => {
     try {
@@ -94,37 +81,57 @@ export default function Profile() {
       });
 
       const data = await response.json();
-      if (!response.ok) throw new Error(data.message || "Failed to delete book");
+      if (!response.ok)
+        throw new Error(data.message || "Failed to delete book");
 
       setBooks(books.filter((book) => book._id !== bookId));
       Alert.alert("Success", "Recommendation deleted successfully");
-    } catch (error: any) {
-      Alert.alert("Error", error.message || "Failed to delete recommendation");
+    } catch (error) {
+      const errorMessage =
+        error && typeof error === "object" && "message" in error
+          ? (error as { message?: string }).message
+          : "Failed to delete recommendation";
+      Alert.alert("Error", errorMessage || "Failed to delete recommendation");
     } finally {
-      setDeleteBookId("");
+      setDeleteBookId(null);
     }
   };
 
   const confirmDelete = (bookId: string) => {
-    Alert.alert("Delete Recommendation", "Are you sure you want to delete this recommendation?", [
-      { text: "Cancel", style: "cancel" },
-      { text: "Delete", style: "destructive", onPress: () => handleDeleteBook(bookId) },
-    ]);
+    Alert.alert(
+      "Delete Recommendation",
+      "Are you sure you want to delete this recommendation?",
+      [
+        { text: "Cancel", style: "cancel" },
+        {
+          text: "Delete",
+          style: "destructive",
+          onPress: () => { handleDeleteBook(bookId); },
+        },
+      ]
+    );
   };
 
-  const renderBookItem = ({ item }: { item: any }) => (
+  const renderBookItem = ({ item }: { item: Book }) => (
     <View style={styles.bookItem}>
       <Image source={item.image} style={styles.bookImage} />
       <View style={styles.bookInfo}>
         <Text style={styles.bookTitle}>{item.title}</Text>
-        <View style={styles.ratingContainer}>{renderRatingStars(item.rating)}</View>
+        <View style={styles.ratingContainer}>
+          {renderRatingStars(item.rating)}
+        </View>
         <Text style={styles.bookCaption} numberOfLines={2}>
           {item.caption}
         </Text>
-        <Text style={styles.bookDate}>{new Date(item.createdAt).toLocaleDateString()}</Text>
+        <Text style={styles.bookDate}>
+          {new Date(item.createdAt).toLocaleDateString()}
+        </Text>
       </View>
 
-      <TouchableOpacity style={styles.deleteButton} onPress={() => confirmDelete(item._id)}>
+      <TouchableOpacity
+        style={styles.deleteButton}
+        onPress={() => confirmDelete(item._id)}
+      >
         {deleteBookId === item._id ? (
           <ActivityIndicator size="small" color={COLORS.primary} />
         ) : (
@@ -164,7 +171,6 @@ export default function Profile() {
       <ProfileHeader />
       <LogoutButton />
 
-      {/* YOUR RECOMMENDATIONS */}
       <View style={styles.booksHeader}>
         <Text style={styles.booksTitle}>Your Recommendations 📚</Text>
         <Text style={styles.booksCount}>{books.length} books</Text>
@@ -186,9 +192,16 @@ export default function Profile() {
         }
         ListEmptyComponent={
           <View style={styles.emptyContainer}>
-            <Ionicons name="book-outline" size={50} color={COLORS.textSecondary} />
+            <Ionicons
+              name="book-outline"
+              size={50}
+              color={COLORS.textSecondary}
+            />
             <Text style={styles.emptyText}>No recommendations yet</Text>
-            <TouchableOpacity style={styles.addButton} onPress={() => router.push("/create")}>
+            <TouchableOpacity
+              style={styles.addButton}
+              onPress={() => router.push("/create")}
+            >
               <Text style={styles.addButtonText}>Add Your First Book</Text>
             </TouchableOpacity>
           </View>

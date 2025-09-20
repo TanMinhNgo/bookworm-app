@@ -17,40 +17,32 @@ import { formatPublishDate } from "../../lib/utils";
 import COLORS from "../../constants/colors";
 import Loader from "../../components/Loader";
 
-export const sleep = (ms: number) =>
-  new Promise((resolve) => setTimeout(resolve, ms));
+export const sleep = (ms: number) => new Promise((resolve) => setTimeout(resolve, ms));
 
 type AuthStore = {
-  user: any;
+  token: string | null;
+};
+
+type Book = {
+  _id: string;
+  title: string;
+  image: string;
+  rating: number;
+  caption: string;
+  createdAt: string;
+  user: {
+    username: string;
+    profileImage: string;
+  };
 };
 
 export default function Home() {
-  const [books, setBooks] = useState([]);
+  const { token } = useAuthStore() as AuthStore;
+  const [books, setBooks] = useState<Book[]>([]);
   const [loading, setLoading] = useState(true);
   const [refreshing, setRefreshing] = useState(false);
   const [page, setPage] = useState(1);
   const [hasMore, setHasMore] = useState(true);
-  const [token, setToken] = useState<string | null>(null);
-
-  const {user} = useAuthStore() as AuthStore;
-
-  useEffect(() => {
-    fetchToken();
-  }, []);
-
-  const fetchToken = async () => {
-    try {
-      
-      const response = await fetch(`${API_URL}/tokens`, {
-        method: "GET"
-      });
-      const data = await response.json();
-      if (!response.ok) throw new Error(data.message || "Something went wrong");
-      setToken(data.token);
-    } catch (error) {
-      console.error("Error fetching token:", error);
-    }
-  };
 
   const fetchBooks = async (pageNum = 1, refresh = false) => {
     try {
@@ -58,20 +50,16 @@ export default function Home() {
       else if (pageNum === 1) setLoading(true);
 
       const response = await fetch(`${API_URL}/books?page=${pageNum}&limit=2`, {
-        method: "GET",
         headers: { Authorization: `Bearer ${token}` },
       });
 
       const data = await response.json();
-      if (!response.ok)
-        throw new Error(data.message || "Failed to fetch books");
+      if (!response.ok) throw new Error(data.message || "Failed to fetch books");
 
       const uniqueBooks =
         refresh || pageNum === 1
           ? data.books
-          : Array.from(
-              new Set([...books, ...data.books].map((book) => book._id))
-            ).map((id) =>
+          : Array.from(new Set([...books, ...data.books].map((book) => book._id))).map((id) =>
               [...books, ...data.books].find((book) => book._id === id)
             );
 
@@ -99,35 +87,24 @@ export default function Home() {
     }
   };
 
-  const renderItem = ({ item }: { item: any }) => (
+  const renderItem = ({ item }: { item: Book }) => (
     <View style={styles.bookCard}>
       <View style={styles.bookHeader}>
         <View style={styles.userInfo}>
-          <Image
-            source={{ uri: item.user.profileImage }}
-            style={styles.avatar}
-          />
+          <Image source={{ uri: item.user.profileImage }} style={styles.avatar} />
           <Text style={styles.username}>{item.user.username}</Text>
         </View>
       </View>
 
       <View style={styles.bookImageContainer}>
-        <Image
-          source={item.image}
-          style={styles.bookImage}
-          contentFit="cover"
-        />
+        <Image source={item.image} style={styles.bookImage} contentFit="cover" />
       </View>
 
       <View style={styles.bookDetails}>
         <Text style={styles.bookTitle}>{item.title}</Text>
-        <View style={styles.ratingContainer}>
-          {renderRatingStars(item.rating)}
-        </View>
+        <View style={styles.ratingContainer}>{renderRatingStars(item.rating)}</View>
         <Text style={styles.caption}>{item.caption}</Text>
-        <Text style={styles.date}>
-          Shared on {formatPublishDate(item.createdAt)}
-        </Text>
+        <Text style={styles.date}>Shared on {formatPublishDate(item.createdAt)}</Text>
       </View>
     </View>
   );
@@ -171,31 +148,19 @@ export default function Home() {
         ListHeaderComponent={
           <View style={styles.header}>
             <Text style={styles.headerTitle}>BookWorm 🐛</Text>
-            <Text style={styles.headerSubtitle}>
-              Discover great reads from the community👇
-            </Text>
+            <Text style={styles.headerSubtitle}>Discover great reads from the community👇</Text>
           </View>
         }
         ListFooterComponent={
           hasMore && books.length > 0 ? (
-            <ActivityIndicator
-              style={styles.footerLoader}
-              size="small"
-              color={COLORS.primary}
-            />
+            <ActivityIndicator style={styles.footerLoader} size="small" color={COLORS.primary} />
           ) : null
         }
         ListEmptyComponent={
           <View style={styles.emptyContainer}>
-            <Ionicons
-              name="book-outline"
-              size={60}
-              color={COLORS.textSecondary}
-            />
+            <Ionicons name="book-outline" size={60} color={COLORS.textSecondary} />
             <Text style={styles.emptyText}>No recommendations yet</Text>
-            <Text style={styles.emptySubtext}>
-              Be the first to share a book!
-            </Text>
+            <Text style={styles.emptySubtext}>Be the first to share a book!</Text>
           </View>
         }
       />
