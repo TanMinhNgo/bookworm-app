@@ -60,17 +60,7 @@ export const useAuthStore = create((set) => ({
       if (!response.ok) throw new Error(data.message || "Something went wrong");
 
       await AsyncStorage.setItem("user", JSON.stringify(data.user));
-      const tokenGet = await fetch(`${API_URL}/tokens`, {
-        method: "GET",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify({
-          user: data.user._id
-        })
-      });
-      const tokenData = await tokenGet.json();
-      if (!tokenGet.ok) throw new Error(tokenData.message || "Something went wrong");
+      await AsyncStorage.setItem("token", data.token);
 
       set({ token: data.token, user: data.user, isLoading: false });
 
@@ -90,7 +80,7 @@ export const useAuthStore = create((set) => ({
       if (!tokenGet.ok) throw new Error(data.message || "Something went wrong");
       const userGet = await AsyncStorage.getItem("user");
       if (data && userGet) {
-        set({ token: data, user: JSON.parse(userGet), isCheckingAuth: false });
+        set({ token: data.token, user: JSON.parse(userGet), isCheckingAuth: false });
       } else {
         set({ token: null, user: null, isCheckingAuth: false });
       }

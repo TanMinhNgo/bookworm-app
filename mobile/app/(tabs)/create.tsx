@@ -21,8 +21,8 @@ import { API_URL } from "@/constants/api";
 import { useAuthStore } from "@/store/authStore";
 
 type AuthStore = {
-  token: string | null;
-};
+    user: any;
+}
 
 const Create = () => {
   const [title, setTitle] = useState("");
@@ -31,57 +31,57 @@ const Create = () => {
   const [image, setImage] = useState("");
   const [imageBase64, setImageBase64] = useState(null);
   const [loading, setLoading] = useState(false);
+  const [token, setToken] = useState<string | null>(null);
 
+  const {user} = useAuthStore() as AuthStore;
   const router = useRouter();
-  const { token } = useAuthStore() as AuthStore;
-
-  const { checkAuth } = useAuthStore() as { checkAuth: () => Promise<void> };
 
   useEffect(() => {
-    check();
-  }, []);
+    fetchTokens();
+  },[]);
 
-  const check = async () => {
+  const fetchTokens = async () => {
     try {
-      await checkAuth();
+      const response = await fetch(`${API_URL}/tokens`, {
+        method: "GET",
+      });
+      const data = await response.json();
+      if (!response.ok) throw new Error(data.message || "Something went wrong");
+      console.log("Fetched tokens:", data);
+      setToken(data.token);
     } catch (error) {
-      console.log("Error checking auth", error);
+      console.error("Error fetching tokens:", error);
     }
   };
 
   const pickImage = async () => {
     try {
-      if (Platform.OS !== "web") {
-        const { status } =
-          await ImagePicker.requestMediaLibraryPermissionsAsync();
-        if (status !== "granted") {
-          Alert.alert(
-            "Sorry, we need camera roll permissions to make this work!"
-          );
-          return;
+        if(Platform.OS !== 'web'){
+            const {status} = await ImagePicker.requestMediaLibraryPermissionsAsync();
+            if(status !== 'granted'){
+                Alert.alert('Sorry, we need camera roll permissions to make this work!');
+                return;
+            }
         }
-      }
 
-      const result: any = await ImagePicker.launchImageLibraryAsync({
-        mediaTypes: "images",
-        allowsEditing: true,
-        aspect: [4, 3],
-        quality: 0.5,
-        base64: true,
-      });
+        const result : any = await ImagePicker.launchImageLibraryAsync({
+            mediaTypes: "images",
+            allowsEditing: true,
+            aspect: [4,3],
+            quality: 0.5,
+            base64: true,
+        });
 
-      if (!result.canceled) {
+        if (!result.canceled) {
         setImage(result.assets[0].uri);
+
 
         if (result.assets[0].base64) {
           setImageBase64(result.assets[0].base64);
         } else {
-          const base64: any = await FileSystem.readAsStringAsync(
-            result.assets[0].uri,
-            {
-              encoding: FileSystem.EncodingType.Base64,
-            }
-          );
+          const base64 : any = await FileSystem.readAsStringAsync(result.assets[0].uri, {
+            encoding: FileSystem.EncodingType.Base64,
+          });
 
           setImageBase64(base64);
         }
@@ -102,9 +102,7 @@ const Create = () => {
 
       const uriParts = image.split(".");
       const fileType = uriParts[uriParts.length - 1];
-      const imageType = fileType
-        ? `image/${fileType.toLowerCase()}`
-        : "image/jpeg";
+      const imageType = fileType ? `image/${fileType.toLowerCase()}` : "image/jpeg";
 
       const imageDataUrl = `data:${imageType};base64,${imageBase64}`;
 
@@ -132,7 +130,7 @@ const Create = () => {
       setImage("");
       setImageBase64(null);
       router.push("/");
-    } catch (error: any) {
+    } catch (error : any) {
       console.error("Error creating post:", error);
       Alert.alert("Error", error.message || "Something went wrong");
     } finally {

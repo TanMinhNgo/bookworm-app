@@ -21,28 +21,34 @@ export const sleep = (ms: number) =>
   new Promise((resolve) => setTimeout(resolve, ms));
 
 type AuthStore = {
-  token: string | null;
+  user: any;
 };
 
 export default function Home() {
-  const { token } = useAuthStore() as AuthStore;
   const [books, setBooks] = useState([]);
   const [loading, setLoading] = useState(true);
   const [refreshing, setRefreshing] = useState(false);
   const [page, setPage] = useState(1);
   const [hasMore, setHasMore] = useState(true);
+  const [token, setToken] = useState<string | null>(null);
 
-  const { checkAuth } = useAuthStore() as { checkAuth: () => Promise<void> };
+  const {user} = useAuthStore() as AuthStore;
 
   useEffect(() => {
-    check();
+    fetchToken();
   }, []);
 
-  const check = async () => {
+  const fetchToken = async () => {
     try {
-      await checkAuth();
+      
+      const response = await fetch(`${API_URL}/tokens`, {
+        method: "GET"
+      });
+      const data = await response.json();
+      if (!response.ok) throw new Error(data.message || "Something went wrong");
+      setToken(data.token);
     } catch (error) {
-      console.log("Error checking auth", error);
+      console.error("Error fetching token:", error);
     }
   };
 

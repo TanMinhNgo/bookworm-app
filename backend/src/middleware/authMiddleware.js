@@ -3,17 +3,13 @@ import User from '../models/User.js';
 
 const protectRoute = async (req, res, next) => {
     try {
-        let token = req.headers["Authorization"];
+        let token = req.headers.authorization;
         if (token) {
-            token = token.replace("Bearer ", "");
-        }
-
-        if (!token) {
-            return res.status(401).json({ message: 'Unauthorized' });
+            token = token.split(" ")[1];
         }
 
         const decoded = jwt.verify(token, process.env.JWT_SECRET);
-        const user = await User.findById(decoded.id);
+        const user = await User.findById(decoded._id);
 
         if (!user) {
             return res.status(401).json({ message: 'Token invalid' });
