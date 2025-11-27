@@ -1,4 +1,3 @@
-
 // this function will convert the createdAt to this format: "May 2023"
 export function formatMemberSince(dateString: string) {
   const date = new Date(dateString);
